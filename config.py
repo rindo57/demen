@@ -55,7 +55,7 @@ DL_BASE_URL = os.getenv("DL_BASE_URL", "https://anidl.ddlserverv1.me.in/shark/")
 # ── Premium User Session (for uploads > 2 GB) ────────────────
 # Generate with: python generate_session.py
 # Then paste the result into your .env file as USER_SESSION_STRING=...
-USER_SESSION_STRING = os.getenv("USER_SESSION_STRING", "BQCcW-MAg4nrNeEAwIUj3PMrSaoVtTLCtlU-SJ2SqyKpP_sj2Gk_hexc-Kjk_wGE9EVQX6T_UFgYo8OTMyBPOI3tX-HuhdF1NjnLf94-zuQYWUnoeLISFRXVvrsBJ3K_Ew-sjApMIjYtX2Zj8OwNXXBh4EDoWGxdGtghKxYTmEG16woRdep2jsbSmmcUjGqbwdwj1J1t7rm52JxrsFHsma82__knPVPQW45tgHTyO9ohyGx4QORiyFXPD7r7cD-6JqcSuwg9TWouoYxM6kzW_ictPqQOyfRYaNcnEzAie-E_9_dNfRP3gl63SkpWsFukBNR6P1ZD5dcxvynjlN9ANRzyqcUjAwAAAAFDAN9YAA")  # Leave empty to disable large-file uploads
+USER_SESSION_STRING = os.getenv("USER_SESSION_STRING", "")  # Leave empty to disable large-file uploads
 
 UPLOAD_TO_USER = os.getenv("UPLOAD_TO_USER", "true").strip().lower() in (
     "1", "true", "yes",
