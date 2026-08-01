@@ -129,7 +129,7 @@ RESOLUTION_PRESETS: dict[str, dict[str, str]] = {
     "480p": {
         "pix_fmt":        "yuv420p10le",
         "vf":             "scale=-2:480:flags=spline",
-        "preset":         "veryslow",
+        "preset":         "slow",
         "video_codec":    "libx265",
         "crf":            "20",
         "x265_params":    _COMMON_X265_PARAMS,
@@ -141,7 +141,7 @@ RESOLUTION_PRESETS: dict[str, dict[str, str]] = {
     "720p": {
         "pix_fmt":        "yuv420p10le",
         "vf":             "scale=-2:720:flags=spline",
-        "preset":         "veryslow",
+        "preset":         "slow",
         "video_codec":    "libx265",
         "crf":            "18",
         "x265_params":    _COMMON_X265_PARAMS,
@@ -153,7 +153,7 @@ RESOLUTION_PRESETS: dict[str, dict[str, str]] = {
     "1080p": {
         "pix_fmt":        "yuv420p10le",
         "vf":             "scale=-2:1080:flags=spline",
-        "preset":         "veryslow",
+        "preset":         "slow",
         "video_codec":    "libx265",
         "crf":            "16",
         "x265_params":    _COMMON_X265_PARAMS,
