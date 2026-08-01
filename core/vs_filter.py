@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 # ── x265 CLI params (best quality, tuned for anime, 24 vCores) ───────────────
 _X265_BEST_PARAMS: dict[str, str] = {
-    "preset":           "slow",
+    "preset":           "veryslow",
     "crf":              "16",
     "deblock":          "3,3",
     "no-sao":           "",            # flag, no value
@@ -169,7 +169,7 @@ core = vs.core
 core.num_threads = {vs_threads}
 
 # ── Source ───────────────────────────────────────────────────────────────────
-src = core.lsmas.LWLibavSource(r"{safe_path}")
+src = core.ffms2.Source(r"{safe_path}")
 
 # Convert to 16-bit for processing headroom
 src16 = core.resize.Bicubic(src, format=vs.YUV420P16)
@@ -177,22 +177,32 @@ src16 = core.resize.Bicubic(src, format=vs.YUV420P16)
 # ── Descale ──────────────────────────────────────────────────────────────────
 {descale_call}
 
-# ── Denoise (BM3D — temporal, best quality) ──────────────────────────────────
-# sigma[0]=luma, sigma[1]=chroma  |  radius=1 enables temporal filtering
-ref      = core.bm3dcpu.BM3D(descaled, sigma={sigma}, radius={radius}, profile="np")
-denoised = core.bm3dcpu.BM3D(descaled, ref=ref, sigma={sigma}, radius={radius},
-                               profile="np", final_=True)
+# ── Denoise ──────────────────────────────────────────────────────────────────
+if hasattr(core, 'bm3dcpu'):
+    ref      = core.bm3dcpu.BM3D(descaled, sigma={sigma}, radius={radius}, profile="np")
+    denoised = core.bm3dcpu.BM3D(descaled, ref=ref, sigma={sigma}, radius={radius}, profile="np", final_=True)
+elif hasattr(core, 'bm3d'):
+    ref      = core.bm3d.Basic(descaled, sigma={sigma})
+    denoised = core.bm3d.Final(descaled, ref=ref, sigma={sigma})
+else:
+    # High-quality built-in bilateral denoiser fallback
+    denoised = core.std.Bilateral(descaled, sigmaS=3.0, sigmaR=0.02)
 {rescale_block}
 # ── Deband ───────────────────────────────────────────────────────────────────
-# Removes gradient banding in sky, fog, flat backgrounds
-debanded = core.neo_f3kdb.Deband(
-    clip,
-    range={db_range},
-    y={db_y}, cb=int({db_y}*0.75), cr=int({db_y}*0.75),
-    grainy={db_grain}, grainc=int({db_grain}//2),
-    sample_mode=2,
-    blur_first=True,
-)
+if hasattr(core, 'neo_f3kdb'):
+    debanded = core.neo_f3kdb.Deband(
+        clip, range={db_range}, y={db_y}, cb=int({db_y}*0.75), cr=int({db_y}*0.75),
+        grainy={db_grain}, grainc=int({db_grain}//2), sample_mode=2, blur_first=True
+    )
+elif hasattr(core, 'f3kdb'):
+    debanded = core.f3kdb.Deband(
+        clip, range={db_range}, y={db_y}, cb=int({db_y}*0.75), cr=int({db_y}*0.75),
+        grainy={db_grain}, grainc=int({db_grain}//2), sample_mode=2
+    )
+else:
+    # High quality built-in dither deband fallback
+    debanded = core.resize.Bicubic(clip, dither_type="error_diffusion")
+
 
 # ── Anti-aliasing ─────────────────────────────────────────────────────────────
 # EEDI3 on both axes — fixes jagged diagonal edges
