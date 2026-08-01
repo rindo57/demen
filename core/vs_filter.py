@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 # ── x265 CLI params (best quality, tuned for anime, 24 vCores) ───────────────
 _X265_BEST_PARAMS: dict[str, str] = {
-    "preset":           "veryslow",
+    "preset":           "slow",
     "crf":              "16",
     "deblock":          "3,3",
     "no-sao":           "",            # flag, no value
