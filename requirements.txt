@@ -1,0 +1,12 @@
+pyrofork
+tgcrypto
+libtorrent
+anitopy
+guessit
+aiohttp
+aiofiles
+humanfriendly
+python-dotenv
+pymongo
+dnspython
+vapoursynth         # pip install vapoursynth
