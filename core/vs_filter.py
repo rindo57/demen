@@ -287,28 +287,30 @@ async def encode_with_vapoursynth(
         vpy_path.write_text(script, encoding="utf-8")
         log.info("[VS] Script written to %s", vpy_path)
 
-        # ── Step 2: vspipe | x265 ────────────────────────────────────────────
+        # ── Step 2: vspipe | x265 via OS pipe ─────────────────────────────────
         vspipe_cmd = ["vspipe", "--y4m", str(vpy_path), "-"]
         x265_cmd   = build_x265_command(str(hevc_path), x265_overrides)
 
         log.info("[VS] vspipe: %s", " ".join(vspipe_cmd))
         log.info("[VS] x265:   %s", " ".join(x265_cmd))
 
+        r, w = os.pipe()
+
         vspipe_proc = await asyncio.create_subprocess_exec(
             *vspipe_cmd,
-            stdout=asyncio.subprocess.PIPE,
+            stdout=w,
             stderr=asyncio.subprocess.PIPE,
         )
+        os.close(w)  # Close write end in parent; child process vspipe holds it open
+
         x265_proc = await asyncio.create_subprocess_exec(
             *x265_cmd,
-            stdin=vspipe_proc.stdout,
+            stdin=r,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,  # x265 progress goes to stderr; merge
         )
+        os.close(r)  # Close read end in parent; child process x265 holds it open
 
-        # Close vspipe stdout in parent so x265 gets EOF when vspipe exits
-        if vspipe_proc.stdout:
-            vspipe_proc.stdout._transport.close()  # type: ignore[attr-defined]
 
         started_at = time.monotonic()
         frames_done = 0
