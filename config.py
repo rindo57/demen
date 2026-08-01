@@ -12,7 +12,7 @@ load_dotenv()
 # ── Telegram API ──────────────────────────────────────────────
 API_ID = int(os.getenv("API_ID", "10247139"))  # Replace with your API ID
 API_HASH = os.getenv("API_HASH", "96b46175824223a33737657ab943fd6a")  # Replace with your API Hash
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8911032602:AAE7kkM5rlVPzJqZZs7KxEPnwiYUlpB_rx4")  # Replace with your Bot Token
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8618736064:AAHWok7FYaerlqbNcYN-4POD34iwKCrSkS4")  # Replace with your Bot Token
 # 8953086807:AAGXLffXX_GTBCCLnimNfcQpTlaSNfKRNyA
 # 8618736064:AAHWok7FYaerlqbNcYN-4POD34iwKCrSkS4 bot 1
 # ── BuzzHeavier Fallback (for >2 GB files without Premium session) ──
