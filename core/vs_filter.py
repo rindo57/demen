@@ -205,13 +205,16 @@ else:
 
 
 # ── Anti-aliasing ─────────────────────────────────────────────────────────────
-# EEDI3 on both axes — fixes jagged diagonal edges
-aa = core.eedi3m.EEDI3(debanded, field=1, alpha=0.25, beta=0.25, gamma=40,
-                        nrad=2, mdis=20)
-aa = core.std.Transpose(aa)
-aa = core.eedi3m.EEDI3(aa, field=1, alpha=0.25, beta=0.25, gamma=40,
-                        nrad=2, mdis=20)
-aa = core.std.Transpose(aa)
+if hasattr(core, 'eedi3m'):
+    aa = core.eedi3m.EEDI3(debanded, field=1, alpha=0.25, beta=0.25, gamma=40, nrad=2, mdis=20)
+    aa = core.std.Transpose(aa)
+    aa = core.eedi3m.EEDI3(aa, field=1, alpha=0.25, beta=0.25, gamma=40, nrad=2, mdis=20)
+    aa = core.std.Transpose(aa)
+elif hasattr(core, 'eedi3'):
+    aa = core.eedi3.eedi3(debanded, field=1)
+else:
+    aa = debanded
+
 
 # ── Output (10-bit for x265) ──────────────────────────────────────────────────
 out = core.resize.Bicubic(aa, format=vs.YUV420P10)
@@ -341,11 +344,16 @@ async def encode_with_vapoursynth(
         await vspipe_proc.wait()
 
         if vspipe_proc.returncode not in (0, None):
-            log.error("[VS] vspipe exited with code %d", vspipe_proc.returncode)
+            vs_err = ""
+            if vspipe_proc.stderr:
+                vs_err_bytes = await vspipe_proc.stderr.read()
+                vs_err = vs_err_bytes.decode(errors="replace").strip()
+            log.error("[VS] vspipe exited with code %d: %s", vspipe_proc.returncode, vs_err)
             return False
         if x265_proc.returncode not in (0, None):
             log.error("[VS] x265 exited with code %d", x265_proc.returncode)
             return False
+
 
         if not hevc_path.exists() or hevc_path.stat().st_size == 0:
             log.error("[VS] HEVC output missing or empty")
